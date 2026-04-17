@@ -1,0 +1,19 @@
+# ==============================================================
+# BACKEND DEPENDENCIES — Drowsiness Detection Server
+# ==============================================================
+#
+# Install with:
+#   pip install -r requirements.txt
+#
+# Requires Python 3.9+
+# ==============================================================
+
+# ── Computer Vision & Face Detection ──────────────────────────
+mediapipe>=0.10.0          # Face mesh landmarks (468-point model)
+opencv-python>=4.8.0       # Frame decoding and image processing
+numpy>=1.24.0              # EAR math and array operations
+
+# ── Web Server & WebSocket ─────────────────────────────────────
+fastapi>=0.100.0            # Async web framework with WebSocket support
+uvicorn>=0.23.0             # ASGI server to run FastAPI
+websockets>=11.0            # WebSocket protocol implementation
