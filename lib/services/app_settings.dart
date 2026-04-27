@@ -1,10 +1,10 @@
-/// ============================================================
-/// APP SETTINGS — Global Configuration Singleton
-/// ============================================================
-///
-/// Stores and manages application-wide settings such as
-/// alert preferences and sensitivity levels.
-/// ============================================================
+// ============================================================
+// APP SETTINGS — Global Configuration Singleton
+// ============================================================
+//
+// Stores and manages application-wide settings such as
+// alert preferences and sensitivity levels.
+// ============================================================
 
 class AppSettings {
   static final AppSettings _instance = AppSettings._internal();
@@ -16,6 +16,10 @@ class AppSettings {
   bool vibrationAlerts = true;
   bool darkMode = false;
   bool autoStart = false;
+
+  // ---- Server Configuration ----
+  String serverIp = '10.85.124.202';
+  int serverPort = 8000;
 
   // ---- Detection Parameters ----
   String sensitivity = 'Medium'; // Low, Medium, High

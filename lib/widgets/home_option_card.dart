@@ -1,17 +1,17 @@
-/// ============================================================
-/// HOME OPTION CARD WIDGET
-/// ============================================================
-/// A reusable card widget used on the Home Page dashboard grid.
-/// Each card displays an icon, title, and navigates to a screen.
-///
-/// Usage:
-///   HomeOptionCard(
-///     icon: Icons.camera,
-///     title: 'Start Detection',
-///     color: Colors.blue,
-///     onTap: () => Navigator.push(...),
-///   )
-/// ============================================================
+// ============================================================
+// HOME OPTION CARD WIDGET
+// ============================================================
+// A reusable card widget used on the Home Page dashboard grid.
+// Each card displays an icon, title, and navigates to a screen.
+//
+// Usage:
+//   HomeOptionCard(
+//     icon: Icons.camera,
+//     title: 'Start Detection',
+//     color: Colors.blue,
+//     onTap: () => Navigator.push(...),
+//   )
+// ============================================================
 
 import 'package:flutter/material.dart';
 
@@ -50,7 +50,7 @@ class HomeOptionCard extends StatelessWidget {
           // Subtle shadow for depth
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.15),
+              color: color.withValues(alpha: 0.15),
               blurRadius: 12,
               offset: const Offset(0, 6),
             ),
@@ -64,14 +64,10 @@ class HomeOptionCard extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 // Light tinted background using the card's color
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                icon,
-                size: 32,
-                color: color,
-              ),
+              child: Icon(icon, size: 32, color: color),
             ),
             const SizedBox(height: 14),
 

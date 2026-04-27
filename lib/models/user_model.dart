@@ -1,14 +1,14 @@
-/// ============================================================
-/// USER MODEL
-/// ============================================================
-/// This file defines the User data model.
-/// It holds all user-related information used across the app.
-///
-/// Future Scope:
-///   - Connect to MongoDB for persistent user storage
-///   - Add authentication tokens
-///   - Add profile image URL from cloud storage
-/// ============================================================
+// ============================================================
+// USER MODEL
+// ============================================================
+// This file defines the User data model.
+// It holds all user-related information used across the app.
+//
+// Future Scope:
+//   - Connect to MongoDB for persistent user storage
+//   - Add authentication tokens
+//   - Add profile image URL from cloud storage
+// ============================================================
 
 class UserModel {
   // Unique identifier for the user (will map to MongoDB _id)

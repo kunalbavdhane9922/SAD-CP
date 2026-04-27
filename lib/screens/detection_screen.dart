@@ -1,20 +1,20 @@
-/// ============================================================
-/// DETECTION SCREEN — Live Drowsiness Monitoring
-/// ============================================================
-///
-/// Real-time detection screen that integrates:
-///   - Front camera preview
-///   - WebSocket communication with FastAPI backend
-///   - Live display of detection results (EAR, status, %)
-///   - Connection status indicator
-///   - Start/Stop/Reset monitoring controls
-///
-/// This screen is opened from the Home Page when the user
-/// taps "Start Detection".
-///
-/// Flow:
-///   Camera → base64 frames → WebSocket → Backend → JSON result → UI
-/// ============================================================
+// ============================================================
+// DETECTION SCREEN — Live Drowsiness Monitoring
+// ============================================================
+//
+// Real-time detection screen that integrates:
+//   - Front camera preview
+//   - WebSocket communication with FastAPI backend
+//   - Live display of detection results (EAR, status, %)
+//   - Connection status indicator
+//   - Start/Stop/Reset monitoring controls
+//
+// This screen is opened from the Home Page when the user
+// taps "Start Detection".
+//
+// Flow:
+//   Camera → base64 frames → WebSocket → Backend → JSON result → UI
+// ============================================================
 
 import 'dart:async';
 import 'package:flutter/material.dart';
@@ -51,26 +51,27 @@ class _DetectionScreenState extends State<DetectionScreen>
   bool _isCameraReady = false;
   String _errorMessage = '';
 
-  // ── Backend Server URL ──
-  final TextEditingController _serverIpController = TextEditingController(
-    text: '192.168.1.5',
-  );
-  final int _serverPort = 8000;
+  // ---- Backend Server URL ──
+  late final TextEditingController _serverIpController;
+  late final int _serverPort;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    
+
     // Initialize Alert Animation
     _alertController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1000),
     )..repeat(reverse: true);
-    
+
     _pulseAnimation = Tween<double>(begin: 0.0, end: 0.4).animate(
       CurvedAnimation(parent: _alertController, curve: Curves.easeInOut),
     );
+
+    _serverIpController = TextEditingController(text: _settings.serverIp);
+    _serverPort = _settings.serverPort;
 
     _initializeCamera();
   }
@@ -81,7 +82,12 @@ class _DetectionScreenState extends State<DetectionScreen>
     _stopMonitoring();
     _alertController.dispose();
     _cameraService.dispose();
+
+    // CRITICAL: Clear the global singleton callback to prevent
+    // calling setState on a defunct element when status changes.
+    _wsService.clearStatusCallback();
     _wsService.disconnect();
+
     _serverIpController.dispose();
     super.dispose();
   }
@@ -117,8 +123,7 @@ class _DetectionScreenState extends State<DetectionScreen>
   void _startMonitoring() {
     if (!_isCameraReady) return;
 
-    final serverUrl =
-        'ws://${_serverIpController.text.trim()}:$_serverPort/ws';
+    final serverUrl = 'ws://${_serverIpController.text.trim()}:$_serverPort/ws';
 
     setState(() {
       _isMonitoring = true;
@@ -128,6 +133,9 @@ class _DetectionScreenState extends State<DetectionScreen>
     // Sync settings to alert service
     _alertService.soundEnabled = _settings.soundAlerts;
     _alertService.vibrationEnabled = _settings.vibrationAlerts;
+
+    // Update settings if user changed IP in the text field
+    _settings.serverIp = _serverIpController.text.trim();
 
     // Connect to the backend WebSocket
     _wsService.connect(
@@ -149,17 +157,16 @@ class _DetectionScreenState extends State<DetectionScreen>
     );
 
     // Start sending camera frames to backend
-    _cameraService.startFrameStream(
-      (base64Frame) {
-        _wsService.sendFrame(base64Frame);
-      },
-    );
+    _cameraService.startFrameStream((base64Frame) {
+      _wsService.sendFrame(base64Frame);
+    });
   }
 
   /// Check result and trigger/stop alerts
   void _handleAlertLogic(DetectionResultModel result) {
     // Trigger alert if drowsy percentage exceeds threshold or status is Drowsy
-    if (result.isDrowsy || result.drowsinessPercentage > _settings.drowsinessThreshold) {
+    if (result.isDrowsy ||
+        result.drowsinessPercentage > _settings.drowsinessThreshold) {
       _alertService.startAlert();
     } else {
       _alertService.stopAlert();
@@ -211,7 +218,7 @@ class _DetectionScreenState extends State<DetectionScreen>
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: _getConnectionColor().withOpacity(0.5),
+                      color: _getConnectionColor().withValues(alpha: 0.5),
                       blurRadius: 6,
                       spreadRadius: 1,
                     ),
@@ -234,9 +241,7 @@ class _DetectionScreenState extends State<DetectionScreen>
                 width: double.infinity,
                 decoration: const BoxDecoration(
                   color: Color(0xFFF4F6F9),
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(28),
-                  ),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
                 ),
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(20),
@@ -263,8 +268,7 @@ class _DetectionScreenState extends State<DetectionScreen>
                       const SizedBox(height: 12),
 
                       // Error message display
-                      if (_errorMessage.isNotEmpty)
-                        _buildErrorBanner(),
+                      if (_errorMessage.isNotEmpty) _buildErrorBanner(),
                     ],
                   ),
                 ),
@@ -293,120 +297,103 @@ class _DetectionScreenState extends State<DetectionScreen>
           color: _result.isDrowsy
               ? const Color(0xFFD63031)
               : _result.status == 'Warning'
-                  ? const Color(0xFFE17055)
-                  : Colors.tealAccent.withOpacity(0.3),
+              ? const Color(0xFFE17055)
+              : Colors.tealAccent.withValues(alpha: 0.3),
           width: 2,
         ),
         boxShadow: [
           BoxShadow(
-            color: (_result.isDrowsy
-                    ? const Color(0xFFD63031)
-                    : Colors.tealAccent)
-                .withOpacity(0.2),
+            color:
+                (_result.isDrowsy ? const Color(0xFFD63031) : Colors.tealAccent)
+                    .withValues(alpha: 0.2),
             blurRadius: 16,
             spreadRadius: 2,
           ),
         ],
       ),
       clipBehavior: Clip.hardEdge,
-        child: _isCameraReady && _cameraService.controller != null
-            ? Stack(
-                fit: StackFit.expand,
-                children: [
-                  // Live camera preview
-                  CameraPreview(_cameraService.controller!),
+      child: _isCameraReady && _cameraService.controller != null
+          ? Stack(
+              fit: StackFit.expand,
+              children: [
+                // Live camera preview
+                CameraPreview(_cameraService.controller!),
 
-                  // ── RED PULSING OVERLAY (Alert) ──
-                  if (_result.status == 'Drowsy' || _result.drowsinessPercentage > _settings.drowsinessThreshold)
-                    AnimatedBuilder(
-                      animation: _pulseAnimation,
-                      builder: (context, child) {
-                        return Container(
-                          decoration: BoxDecoration(
-                            color: Colors.red.withOpacity(_pulseAnimation.value),
-                          ),
-                          child: Center(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.warning_amber_rounded, color: Colors.white, size: 64),
-                                const SizedBox(height: 12),
-                                Text(
-                                  'DROWSINESS DETECTED',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 2,
-                                    shadows: [
-                                      Shadow(color: Colors.black54, blurRadius: 8),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-
-                  // ── NO FACE DETECTED BANNER ──
-                  if (_result.error != null && _result.error!.contains('No face'))
-                    Positioned(
-                      bottom: 20,
-                      left: 20,
-                      right: 20,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                // ── RED PULSING OVERLAY (Alert) ──
+                if (_result.status == 'Drowsy' ||
+                    _result.drowsinessPercentage >
+                        _settings.drowsinessThreshold)
+                  AnimatedBuilder(
+                    animation: _pulseAnimation,
+                    builder: (context, child) {
+                      return Container(
                         decoration: BoxDecoration(
-                          color: Colors.orange.withOpacity(0.9),
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 6)],
-                        ),
-                        child: const Row(
-                          children: [
-                            Icon(Icons.face_retouching_off, color: Colors.white),
-                            SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                'No Face Detected - Please Adjust Camera',
-                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                  // Status overlay at top-left
-                  Positioned(
-                    top: 12,
-                    left: 12,
-                    child: Container(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: Colors.black54,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            _isMonitoring
-                                ? Icons.fiber_manual_record
-                                : Icons.videocam_off,
-                            color: _isMonitoring ? Colors.red : Colors.grey,
-                            size: 12,
+                          color: Colors.red.withValues(
+                            alpha: _pulseAnimation.value,
                           ),
-                          const SizedBox(width: 4),
-                          Text(
-                            _isMonitoring ? 'LIVE' : 'PAUSED',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1,
+                        ),
+                        child: Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.warning_amber_rounded,
+                                color: Colors.white,
+                                size: 64,
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                'DROWSINESS DETECTED',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 2,
+                                  shadows: [
+                                    Shadow(
+                                      color: Colors.black54,
+                                      blurRadius: 8,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+
+                // ── NO FACE DETECTED BANNER ──
+                if (_result.error != null && _result.error!.contains('No face'))
+                  Positioned(
+                    bottom: 20,
+                    left: 20,
+                    right: 20,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.withValues(alpha: 0.9),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(color: Colors.black26, blurRadius: 6),
+                        ],
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.face_retouching_off, color: Colors.white),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'No Face Detected - Please Adjust Camera',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
                             ),
                           ),
                         ],
@@ -414,31 +401,71 @@ class _DetectionScreenState extends State<DetectionScreen>
                     ),
                   ),
 
-                  // EAR value overlay at top-right
-                  if (_isMonitoring)
-                    Positioned(
-                      top: 12,
-                      right: 12,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 5),
-                        decoration: BoxDecoration(
-                          color: Colors.black54,
-                          borderRadius: BorderRadius.circular(8),
+                // Status overlay at top-left
+                Positioned(
+                  top: 12,
+                  left: 12,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.black54,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          _isMonitoring
+                              ? Icons.fiber_manual_record
+                              : Icons.videocam_off,
+                          color: _isMonitoring ? Colors.red : Colors.grey,
+                          size: 12,
                         ),
-                        child: Text(
-                          'EAR: ${_result.earDisplay}',
+                        const SizedBox(width: 4),
+                        Text(
+                          _isMonitoring ? 'LIVE' : 'PAUSED',
                           style: const TextStyle(
-                            color: Colors.tealAccent,
-                            fontSize: 12,
+                            color: Colors.white,
+                            fontSize: 11,
                             fontWeight: FontWeight.bold,
-                            fontFamily: 'monospace',
+                            letterSpacing: 1,
                           ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // EAR value overlay at top-right
+                if (_isMonitoring)
+                  Positioned(
+                    top: 12,
+                    right: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black54,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        'EAR: ${_result.earDisplay}',
+                        style: const TextStyle(
+                          color: Colors.tealAccent,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'monospace',
                         ),
                       ),
                     ),
-                ],
-              )
+                  ),
+              ],
+            )
           : const Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -460,19 +487,13 @@ class _DetectionScreenState extends State<DetectionScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: _getConnectionColor().withOpacity(0.1),
+        color: _getConnectionColor().withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: _getConnectionColor().withOpacity(0.3),
-        ),
+        border: Border.all(color: _getConnectionColor().withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
-          Icon(
-            _getConnectionIcon(),
-            color: _getConnectionColor(),
-            size: 20,
-          ),
+          Icon(_getConnectionIcon(), color: _getConnectionColor(), size: 20),
           const SizedBox(width: 10),
           Text(
             _getConnectionText(),
@@ -505,7 +526,7 @@ class _DetectionScreenState extends State<DetectionScreen>
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.08),
+            color: Colors.grey.withValues(alpha: 0.08),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -561,26 +582,22 @@ class _DetectionScreenState extends State<DetectionScreen>
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            _result.statusColor.withOpacity(0.15),
-            _result.statusColor.withOpacity(0.05),
+            _result.statusColor.withValues(alpha: 0.15),
+            _result.statusColor.withValues(alpha: 0.05),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: _result.statusColor.withOpacity(0.3),
+          color: _result.statusColor.withValues(alpha: 0.3),
           width: 1.5,
         ),
       ),
       child: Column(
         children: [
           // Status icon
-          Icon(
-            _result.statusIcon,
-            size: 48,
-            color: _result.statusColor,
-          ),
+          Icon(_result.statusIcon, size: 48, color: _result.statusColor),
           const SizedBox(height: 10),
 
           // Status text
@@ -598,10 +615,7 @@ class _DetectionScreenState extends State<DetectionScreen>
           // Eye state text
           Text(
             'Eye State: ${_result.state}',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey.shade600,
-            ),
+            style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
           ),
           const SizedBox(height: 14),
 
@@ -612,9 +626,7 @@ class _DetectionScreenState extends State<DetectionScreen>
               value: _result.drowsinessPercentage / 100.0,
               minHeight: 10,
               backgroundColor: Colors.grey.shade200,
-              valueColor: AlwaysStoppedAnimation<Color>(
-                _result.statusColor,
-              ),
+              valueColor: AlwaysStoppedAnimation<Color>(_result.statusColor),
             ),
           ),
           const SizedBox(height: 6),
@@ -687,7 +699,7 @@ class _DetectionScreenState extends State<DetectionScreen>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 3),
           ),
@@ -810,10 +822,7 @@ class _DetectionScreenState extends State<DetectionScreen>
           Expanded(
             child: Text(
               _errorMessage,
-              style: TextStyle(
-                color: Colors.red.shade700,
-                fontSize: 12,
-              ),
+              style: TextStyle(color: Colors.red.shade700, fontSize: 12),
             ),
           ),
         ],

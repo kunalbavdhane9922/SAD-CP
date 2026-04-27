@@ -1,30 +1,49 @@
-/// ============================================================
-/// HOME PAGE (Dashboard)
-/// ============================================================
-/// Main dashboard screen with a 2x3 grid of feature cards.
-/// Acts as the central hub for navigating to all app features.
-///
-/// Grid Options:
-///   1. Start Detection  → DetectionScreen
-///   2. Drive History     → PlaceholderPage
-///   3. Live Alerts       → PlaceholderPage
-///   4. Profile           → ProfilePage
-///   5. Settings          → SettingsPage
-///   6. Help & Support    → PlaceholderPage
-/// ============================================================
+// ============================================================
+// HOME PAGE (Dashboard)
+// ============================================================
+// Main dashboard screen with a 2x3 grid of feature cards.
+// Acts as the central hub for navigating to all app features.
+//
+// Grid Options:
+//   1. Start Detection  → DetectionScreen
+//   2. Drive History     → PlaceholderPage
+//   3. Live Alerts       → PlaceholderPage
+//   4. Profile           → ProfilePage
+//   5. Settings          → SettingsPage
+//   6. Help & Support    → PlaceholderPage
+// ============================================================
 
 import 'package:flutter/material.dart';
 import '../widgets/home_option_card.dart';
+import '../services/websocket_service.dart';
 import 'detection_screen.dart';
 import 'profile_page.dart';
 import 'settings_page.dart';
 import 'placeholder_page.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final WebSocketService _wsService = WebSocketService();
+  ConnectionStatus _status = ConnectionStatus.disconnected;
+
+  @override
+  void initState() {
+    super.initState();
+    _status = _wsService.status;
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Refresh status from service
+    _status = _wsService.status;
+    final bool isReady = _status == ConnectionStatus.connected;
+
     return Scaffold(
       // ---- App Background ----
       backgroundColor: const Color(0xFFF4F6F9),
@@ -33,10 +52,7 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(
         title: const Text(
           'DrowsiGuard',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.0,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.0),
         ),
         centerTitle: true,
         backgroundColor: const Color(0xFF0F2027),
@@ -64,10 +80,7 @@ class HomePage extends StatelessWidget {
             // ---- Welcome Section ----
             const Text(
               'Welcome back,',
-              style: TextStyle(
-                fontSize: 16,
-                color: Color(0xFF636E72),
-              ),
+              style: TextStyle(fontSize: 16, color: Color(0xFF636E72)),
             ),
             const SizedBox(height: 4),
             const Text(
@@ -81,27 +94,46 @@ class HomePage extends StatelessWidget {
             const SizedBox(height: 8),
 
             // ---- Status Indicator ----
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.green.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.green.withOpacity(0.3)),
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.circle, size: 10, color: Colors.green),
-                  SizedBox(width: 6),
-                  Text(
-                    'System Ready',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.green,
+            GestureDetector(
+              onTap: () {
+                // Navigate to detection screen or just show status
+                setState(() {}); // Manual refresh
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: (isReady ? Colors.green : Colors.red).withValues(
+                    alpha: 0.1,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: (isReady ? Colors.green : Colors.red).withValues(
+                      alpha: 0.3,
                     ),
                   ),
-                ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.circle,
+                      size: 10,
+                      color: isReady ? Colors.green : Colors.red,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      isReady ? 'System Ready' : 'System Not Ready',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: isReady ? Colors.green : Colors.red,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 28),
@@ -130,12 +162,16 @@ class HomePage extends StatelessWidget {
                     icon: Icons.camera_alt_rounded,
                     title: 'Start\nDetection',
                     color: const Color(0xFF6C5CE7),
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const DetectionScreen(),
-                      ),
-                    ),
+                    onTap: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const DetectionScreen(),
+                        ),
+                      );
+                      // Refresh status when returning
+                      if (mounted) setState(() {});
+                    },
                   ),
 
                   // Card 2: Drive History
@@ -146,9 +182,8 @@ class HomePage extends StatelessWidget {
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => const PlaceholderPage(
-                          title: 'Drive History',
-                        ),
+                        builder: (_) =>
+                            const PlaceholderPage(title: 'Drive History'),
                       ),
                     ),
                   ),
@@ -161,9 +196,8 @@ class HomePage extends StatelessWidget {
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => const PlaceholderPage(
-                          title: 'Live Alerts',
-                        ),
+                        builder: (_) =>
+                            const PlaceholderPage(title: 'Live Alerts'),
                       ),
                     ),
                   ),
@@ -175,9 +209,7 @@ class HomePage extends StatelessWidget {
                     color: const Color(0xFF0984E3),
                     onTap: () => Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (_) => const ProfilePage(),
-                      ),
+                      MaterialPageRoute(builder: (_) => const ProfilePage()),
                     ),
                   ),
 
@@ -188,9 +220,7 @@ class HomePage extends StatelessWidget {
                     color: const Color(0xFFE17055),
                     onTap: () => Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (_) => const SettingsPage(),
-                      ),
+                      MaterialPageRoute(builder: (_) => const SettingsPage()),
                     ),
                   ),
 
@@ -202,9 +232,8 @@ class HomePage extends StatelessWidget {
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => const PlaceholderPage(
-                          title: 'Help & Support',
-                        ),
+                        builder: (_) =>
+                            const PlaceholderPage(title: 'Help & Support'),
                       ),
                     ),
                   ),

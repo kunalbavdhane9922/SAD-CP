@@ -1,18 +1,18 @@
-/// ============================================================
-/// EDIT PROFILE PAGE
-/// ============================================================
-/// Allows the user to modify their profile information.
-/// Returns the updated UserModel to the ProfilePage on save.
-///
-/// Features:
-///   - Pre-filled form with current user data
-///   - Form validation for all fields
-///   - Returns updated UserModel via Navigator.pop()
-///
-/// Future Scope:
-///   - Save changes to MongoDB
-///   - Upload profile picture
-/// ============================================================
+// ============================================================
+// EDIT PROFILE PAGE
+// ============================================================
+// Allows the user to modify their profile information.
+// Returns the updated UserModel to the ProfilePage on save.
+//
+// Features:
+//   - Pre-filled form with current user data
+//   - Form validation for all fields
+//   - Returns updated UserModel via Navigator.pop()
+//
+// Future Scope:
+//   - Save changes to MongoDB
+//   - Upload profile picture
+// ============================================================
 
 import 'package:flutter/material.dart';
 import '../models/user_model.dart';
@@ -49,8 +49,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
     _emailController = TextEditingController(text: widget.user.email);
     _phoneController = TextEditingController(text: widget.user.phone);
     _vehicleController = TextEditingController(text: widget.user.vehicleNumber);
-    _emergencyController =
-        TextEditingController(text: widget.user.emergencyContact);
+    _emergencyController = TextEditingController(
+      text: widget.user.emergencyContact,
+    );
   }
 
   @override
@@ -130,10 +131,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
               const SizedBox(height: 6),
               Text(
                 'Update your details below',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.grey.shade500,
-                ),
+                style: TextStyle(fontSize: 13, color: Colors.grey.shade500),
               ),
               const SizedBox(height: 24),
 
@@ -286,28 +284,24 @@ class _EditProfilePageState extends State<EditProfilePage> {
       controller: controller,
       keyboardType: keyboardType,
       validator: validator,
-      style: const TextStyle(
-        fontSize: 15,
-        color: Color(0xFF2D3436),
-      ),
+      style: const TextStyle(fontSize: 15, color: Color(0xFF2D3436)),
       decoration: InputDecoration(
         labelText: label,
         labelStyle: TextStyle(color: Colors.grey.shade500),
         prefixIcon: Icon(icon, color: const Color(0xFF0984E3)),
         filled: true,
         fillColor: Colors.white,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide(color: Colors.grey.shade200),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(
-            color: Color(0xFF0984E3),
-            width: 1.5,
-          ),
+          borderSide: const BorderSide(color: Color(0xFF0984E3), width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),

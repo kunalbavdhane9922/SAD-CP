@@ -1,21 +1,21 @@
-/// ============================================================
-/// SETTINGS PAGE
-/// ============================================================
-/// App settings screen with toggles and configuration options.
-/// Uses ListTile switches and navigation tiles.
-///
-/// Features:
-///   - Sound alerts toggle
-///   - Vibration alerts toggle
-///   - Dark mode toggle (UI only, not implemented)
-///   - Sensitivity level selector
-///   - About section
-///
-/// Future Scope:
-///   - Persist settings using SharedPreferences
-///   - Sync settings with MongoDB user profile
-///   - Implement actual dark mode theme switching
-/// ============================================================
+// ============================================================
+// SETTINGS PAGE
+// ============================================================
+// App settings screen with toggles and configuration options.
+// Uses ListTile switches and navigation tiles.
+//
+// Features:
+//   - Sound alerts toggle
+//   - Vibration alerts toggle
+//   - Dark mode toggle (UI only, not implemented)
+//   - Sensitivity level selector
+//   - About section
+//
+// Future Scope:
+//   - Persist settings using SharedPreferences
+//   - Sync settings with MongoDB user profile
+//   - Implement actual dark mode theme switching
+// ============================================================
 
 import 'package:flutter/material.dart';
 import '../services/app_settings.dart';
@@ -115,9 +115,7 @@ class _SettingsPageState extends State<SettingsPage> {
               setState(() => _settings.darkMode = val);
               // TODO: Implement actual theme switching
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Dark mode coming soon!'),
-                ),
+                const SnackBar(content: Text('Dark mode coming soon!')),
               );
             },
           ),
@@ -218,19 +216,18 @@ class _SettingsPageState extends State<SettingsPage> {
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.06),
+            color: Colors.grey.withValues(alpha: 0.06),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
         ],
       ),
       child: ListTile(
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Icon(icon, color: color, size: 22),
@@ -245,15 +242,12 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         subtitle: Text(
           subtitle,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey.shade500,
-          ),
+          style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
         ),
         trailing: Switch(
           value: value,
           onChanged: onChanged,
-          activeColor: color,
+          activeThumbColor: color,
         ),
       ),
     );
@@ -273,19 +267,18 @@ class _SettingsPageState extends State<SettingsPage> {
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.06),
+            color: Colors.grey.withValues(alpha: 0.06),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
         ],
       ),
       child: ListTile(
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Icon(icon, color: color, size: 22),
@@ -300,17 +293,16 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         subtitle: Text(
           subtitle,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey.shade500,
-          ),
+          style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
         ),
         trailing: DropdownButton<String>(
           value: _settings.sensitivity,
           underline: const SizedBox(),
-          items: ['Low', 'Medium', 'High']
-              .map((s) => DropdownMenuItem(value: s, child: Text(s)))
-              .toList(),
+          items: [
+            'Low',
+            'Medium',
+            'High',
+          ].map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
           onChanged: (val) {
             if (val != null) setState(() => _settings.sensitivity = val);
           },
@@ -333,19 +325,18 @@ class _SettingsPageState extends State<SettingsPage> {
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.06),
+            color: Colors.grey.withValues(alpha: 0.06),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
         ],
       ),
       child: ListTile(
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Icon(icon, color: color, size: 22),

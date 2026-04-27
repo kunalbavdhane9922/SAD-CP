@@ -1,15 +1,15 @@
-/// ============================================================
-/// PLACEHOLDER PAGE
-/// ============================================================
-/// A generic placeholder screen used for features not yet
-/// implemented (e.g., Start Detection, Drive History, etc.).
-///
-/// Usage:
-///   PlaceholderPage(title: 'Start Detection')
-///
-/// This page shows a "Coming Soon" message and can be replaced
-/// with actual feature implementations as they are developed.
-/// ============================================================
+// ============================================================
+// PLACEHOLDER PAGE
+// ============================================================
+// A generic placeholder screen used for features not yet
+// implemented (e.g., Start Detection, Drive History, etc.).
+//
+// Usage:
+//   PlaceholderPage(title: 'Start Detection')
+//
+// This page shows a "Coming Soon" message and can be replaced
+// with actual feature implementations as they are developed.
+// ============================================================
 
 import 'package:flutter/material.dart';
 
@@ -40,7 +40,7 @@ class PlaceholderPage extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF6C5CE7).withOpacity(0.1),
+                  color: const Color(0xFF6C5CE7).withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
@@ -83,10 +83,7 @@ class PlaceholderPage extends StatelessWidget {
                   icon: const Icon(Icons.arrow_back_rounded, size: 20),
                   label: const Text(
                     'Go Back',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF0984E3),

@@ -1,33 +1,33 @@
-/// ============================================================
-/// DETECTION RESULT MODEL (Flutter-side)
-/// ============================================================
-///
-/// This Dart model mirrors the Python backend's DetectionResult.
-/// Used to deserialize WebSocket JSON responses into
-/// strongly-typed Dart objects for the UI.
-///
-/// JSON Contract (sent by backend):
-/// {
-///   "ear": 0.21,
-///   "smoothed_ear": 0.2234,
-///   "eye_closed": true,
-///   "state": "Drowsy",
-///   "is_drowsy": true,
-///   "closed_eye_frames": 42,
-///   "total_frames": 60,
-///   "drowsiness_percentage": 60.0,
-///   "status": "Warning",
-///   "blink_count": 5,
-///   "error": null
-/// }
-///
-/// Usage:
-///   final json = jsonDecode(websocketMessage);
-///   final result = DetectionResultModel.fromJson(json);
-///   print(result.status);              // "Warning"
-///   print(result.drowsinessPercentage); // 60.0
-///   print(result.statusColor);          // Colors.orange
-/// ============================================================
+// ============================================================
+// DETECTION RESULT MODEL (Flutter-side)
+// ============================================================
+//
+// This Dart model mirrors the Python backend's DetectionResult.
+// Used to deserialize WebSocket JSON responses into
+// strongly-typed Dart objects for the UI.
+//
+// JSON Contract (sent by backend):
+// {
+//   "ear": 0.21,
+//   "smoothed_ear": 0.2234,
+//   "eye_closed": true,
+//   "state": "Drowsy",
+//   "is_drowsy": true,
+//   "closed_eye_frames": 42,
+//   "total_frames": 60,
+//   "drowsiness_percentage": 60.0,
+//   "status": "Warning",
+//   "blink_count": 5,
+//   "error": null
+// }
+//
+// Usage:
+//   final json = jsonDecode(websocketMessage);
+//   final result = DetectionResultModel.fromJson(json);
+//   print(result.status);              // "Warning"
+//   print(result.drowsinessPercentage); // 60.0
+//   print(result.statusColor);          // Colors.orange
+// ============================================================
 
 import 'package:flutter/material.dart';
 

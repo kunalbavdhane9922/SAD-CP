@@ -2,19 +2,19 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:vibration/vibration.dart';
 import 'package:flutter/foundation.dart';
 
-/// ============================================================
-/// ALERT SERVICE — Sound and Vibration Management
-/// ============================================================
-///
-/// This service handles the physical alerts (audio and haptic)
-/// when drowsiness is detected. It ensures that alerts are
-/// played consistently but don't overlap or cause lag.
-///
-/// Features:
-///   - Start/Stop alarm sound (looping)
-///   - Trigger vibration patterns
-///   - Singleton pattern for easy access
-/// ============================================================
+// ============================================================
+// ALERT SERVICE — Sound and Vibration Management
+// ============================================================
+//
+// This service handles the physical alerts (audio and haptic)
+// when drowsiness is detected. It ensures that alerts are
+// played consistently but don't overlap or cause lag.
+//
+// Features:
+//   - Start/Stop alarm sound (looping)
+//   - Trigger vibration patterns
+//   - Singleton pattern for easy access
+// ============================================================
 
 class AlertService {
   // ── Singleton Setup ──
@@ -30,7 +30,7 @@ class AlertService {
   // ── Configuration ──
   bool soundEnabled = true;
   bool vibrationEnabled = true;
-  
+
   /// Initialize the service (pre-load sound if needed)
   Future<void> initialize() async {
     await _audioPlayer.setReleaseMode(ReleaseMode.loop);
@@ -76,7 +76,7 @@ class AlertService {
   /// Internal helper to manage continuous vibration
   Future<void> _startVibration() async {
     _isVibrating = true;
-    
+
     // Check if device supports vibration
     bool? hasVibrator = await Vibration.hasVibrator();
     if (hasVibrator != true) return;

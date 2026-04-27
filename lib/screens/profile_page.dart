@@ -1,18 +1,18 @@
-/// ============================================================
-/// PROFILE PAGE
-/// ============================================================
-/// Displays the user's profile information including name,
-/// email, phone, vehicle number, and emergency contact.
-///
-/// Features:
-///   - Displays user info from UserModel (mock data)
-///   - Navigate to EditProfilePage to update info
-///   - Logout functionality
-///
-/// Future Scope:
-///   - Fetch profile from MongoDB
-///   - Display profile picture from cloud storage
-/// ============================================================
+// ============================================================
+// PROFILE PAGE
+// ============================================================
+// Displays the user's profile information including name,
+// email, phone, vehicle number, and emergency contact.
+//
+// Features:
+//   - Displays user info from UserModel (mock data)
+//   - Navigate to EditProfilePage to update info
+//   - Logout functionality
+//
+// Future Scope:
+//   - Fetch profile from MongoDB
+//   - Display profile picture from cloud storage
+// ============================================================
 
 import 'package:flutter/material.dart';
 import '../models/user_model.dart';
@@ -40,9 +40,7 @@ class _ProfilePageState extends State<ProfilePage> {
   void _navigateToEditProfile() async {
     final updatedUser = await Navigator.push<UserModel>(
       context,
-      MaterialPageRoute(
-        builder: (_) => EditProfilePage(user: _user),
-      ),
+      MaterialPageRoute(builder: (_) => EditProfilePage(user: _user)),
     );
 
     // If the user saved changes, update the profile
@@ -127,7 +125,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   // Avatar circle with initials
                   CircleAvatar(
                     radius: 45,
-                    backgroundColor: Colors.tealAccent.withOpacity(0.2),
+                    backgroundColor: Colors.tealAccent.withValues(alpha: 0.2),
                     child: Text(
                       _getInitials(_user.name),
                       style: const TextStyle(
@@ -153,7 +151,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     _user.email,
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.white.withOpacity(0.7),
+                      color: Colors.white.withValues(alpha: 0.7),
                     ),
                   ),
                 ],
@@ -252,7 +250,7 @@ class _ProfilePageState extends State<ProfilePage> {
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.08),
+            color: Colors.grey.withValues(alpha: 0.08),
             blurRadius: 8,
             offset: const Offset(0, 3),
           ),
@@ -264,7 +262,7 @@ class _ProfilePageState extends State<ProfilePage> {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: color, size: 22),
