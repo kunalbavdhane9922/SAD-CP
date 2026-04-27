@@ -8,7 +8,7 @@ A comprehensive mobile and backend solution for detecting driver drowsiness in r
 
 ---
 
-## 📋 Project Overview
+## Project Overview
 
 DrowsiGuard is a real-time driver monitoring system designed to detect and alert drivers when drowsiness is detected while driving. The system uses the device's front-facing camera to analyze eye aspect ratio (EAR), detect eye closures, and classify drowsiness states through a sophisticated state machine.
 
@@ -24,7 +24,7 @@ DrowsiGuard is a real-time driver monitoring system designed to detect and alert
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ### System Architecture Overview
 
@@ -77,7 +77,7 @@ DrowsiGuard is a real-time driver monitoring system designed to detect and alert
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Frontend (Flutter)
 
@@ -108,7 +108,7 @@ DrowsiGuard is a real-time driver monitoring system designed to detect and alert
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 drowsiness_detection/
@@ -170,7 +170,7 @@ drowsiness_detection/
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -242,7 +242,7 @@ drowsiness_detection/
 
 ---
 
-## 💻 Usage
+## Usage
 
 ### Running the App
 
@@ -284,7 +284,7 @@ drowsiness_detection/
 
 ---
 
-## 🧠 Drowsiness Detection Algorithm
+## Drowsiness Detection Algorithm
 
 ### Eye Aspect Ratio (EAR)
 
@@ -322,7 +322,7 @@ Where p1-p6 are eye landmark coordinates. EAR drops below ~0.21 when eyes close.
 
 ---
 
-## 🔌 API Contract
+## API Contract
 
 ### WebSocket Endpoint: `/ws`
 
@@ -366,7 +366,7 @@ Where p1-p6 are eye landmark coordinates. EAR drops below ~0.21 when eyes close.
 
 ---
 
-## 📊 Configuration & Tuning
+## Configuration & Tuning
 
 ### Adjusting Sensitivity
 
@@ -398,7 +398,7 @@ ResolutionPreset.low,    # Current (smaller payload, faster)
 
 ---
 
-## ⚠️ Known Issues & TODOs
+## Known Issues & TODOs
 
 ### Production Gaps
 
@@ -425,7 +425,7 @@ ResolutionPreset.low,    # Current (smaller payload, faster)
 
 ---
 
-## 📈 Recent Changes (v1.0.0)
+## Recent Changes (v1.0.0)
 
 ### Commit History
 
@@ -445,7 +445,7 @@ ResolutionPreset.low,    # Current (smaller payload, faster)
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 ### Development Workflow
 
@@ -476,7 +476,7 @@ ResolutionPreset.low,    # Current (smaller payload, faster)
 
 ---
 
-## 📋 Testing
+## Testing
 
 ### Manual Testing Checklist
 
@@ -502,7 +502,7 @@ http://localhost:8000/docs
 
 ---
 
-## 🔒 Security & Privacy
+## Security & Privacy
 
 **Current Status**: Development/Testing Only
 
@@ -521,7 +521,7 @@ http://localhost:8000/docs
 
 ---
 
-## 📞 Support & Contact
+## Support & Contact
 
 - **Issues**: Report bugs on [GitHub Issues](https://github.com/kunalbavdhane9922/SAD-CP/issues)
 - **Repository**: [kunalbavdhane9922/SAD-CP](https://github.com/kunalbavdhane9922/SAD-CP)
@@ -529,13 +529,13 @@ http://localhost:8000/docs
 
 ---
 
-## 📄 License
+## License
 
 [Add License Info Here]
 
 ---
 
-## 🎯 Future Roadmap
+## Future Roadmap
 
 - **v1.1.0**: MongoDB integration for user profiles and drive history
 - **v1.2.0**: Multi-user backend with thread-safe engine
