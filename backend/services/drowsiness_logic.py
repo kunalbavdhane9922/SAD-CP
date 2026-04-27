@@ -316,7 +316,7 @@ class EyeStateTracker:
                 if (
                     self._current_state == self.STATE_CLOSING
                     and self._consecutive_closed <= BLINK_MAX_FRAMES
-                    and self._consecutive_closed >= 2  # At least 2 frames
+                    and self._consecutive_closed >= 1  # At least 1 frame (at 5 FPS, a blink is often just 1 frame)
                 ):
                     # Yes, it was a blink! Count it but DON'T flag as drowsy
                     self._blink_count += 1

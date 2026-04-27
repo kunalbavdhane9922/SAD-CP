@@ -8,6 +8,7 @@ import json
 import logging
 
 from services.drowsiness_logic import DrowsinessLogic
+from models.detection_result import DetectionResult
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -44,59 +45,71 @@ async def websocket_endpoint(websocket: WebSocket):
     
     try:
         while True:
-            # Receive data from Flutter
-            data = await websocket.receive_text()
-            message = json.loads(data)
-            
-            if 'frame' not in message:
-                continue
+            try:
+                # Receive data from Flutter
+                data = await websocket.receive_text()
+                message = json.loads(data)
                 
-            # 1. Decode base64 frame
-            header, encoded = message['frame'].split(",", 1) if "," in message['frame'] else (None, message['frame'])
-            image_bytes = base64.b64decode(encoded)
-            nparr = np.frombuffer(image_bytes, np.uint8)
-            frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-            
-            if frame is None:
-                await websocket.send_json({"error": "Failed to decode image"})
-                continue
+                if 'frame' not in message:
+                    continue
+                    
+                # 1. Decode base64 frame
+                header, encoded = message['frame'].split(",", 1) if "," in message['frame'] else (None, message['frame'])
+                image_bytes = base64.b64decode(encoded)
+                nparr = np.frombuffer(image_bytes, np.uint8)
+                frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
                 
-            # 2. Process with MediaPipe
-            rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            results = face_mesh.process(rgb_frame)
-            
-            if not results.multi_face_landmarks:
-                # No face detected
-                response = {
-                    "error": "No face detected",
-                    "status": "Warning",
-                    "state": "Unknown",
-                    "drowsiness_percentage": 0,
-                    "ear": 0
-                }
-                await websocket.send_json(response)
-                continue
+                if frame is None:
+                    await websocket.send_json({"error": "Failed to decode image"})
+                    continue
+                    
+                # 2. Process with MediaPipe
+                rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                results = face_mesh.process(rgb_frame)
                 
-            # 3. Extract landmarks
-            landmarks = []
-            for landmark in results.multi_face_landmarks[0].landmark:
-                landmarks.append({
-                    "x": landmark.x,
-                    "y": landmark.y,
-                    "z": landmark.z
-                })
+                if not results.multi_face_landmarks:
+                    # No face detected — send complete response
+                    no_face = DetectionResult.no_face()
+                    await websocket.send_json(no_face.to_dict())
+                    continue
+                    
+                # 3. Extract landmarks
+                landmarks = []
+                for landmark in results.multi_face_landmarks[0].landmark:
+                    landmarks.append({
+                        "x": landmark.x,
+                        "y": landmark.y,
+                        "z": landmark.z
+                    })
+                    
+                # 4. Run Drowsiness Logic
+                detection_result = drowsiness_engine.process_landmarks(landmarks)
                 
-            # 4. Run Drowsiness Logic
-            detection_result = drowsiness_engine.process_landmarks(landmarks)
-            
-            # 5. Send result back to Flutter
-            await websocket.send_json(detection_result.to_dict())
-            
+                # Log detection result for debugging
+                logger.info(
+                    f"Frame processed — EAR: {detection_result.ear:.4f}, "
+                    f"State: {detection_result.state}, "
+                    f"Status: {detection_result.status}, "
+                    f"Drowsy%: {detection_result.drowsiness_percentage:.1f}%"
+                )
+                
+                # 5. Send result back to Flutter
+                await websocket.send_json(detection_result.to_dict())
+                
+            except WebSocketDisconnect:
+                # Re-raise to the outer block to break the loop correctly
+                raise
+            except Exception as inner_e:
+                import traceback
+                logger.error(f"Error processing frame: {inner_e}")
+                logger.error(traceback.format_exc())
+                try:
+                    await websocket.send_json({"error": "Backend processing error"})
+                except Exception:
+                    pass
+                
     except WebSocketDisconnect:
         logger.info("Client disconnected")
-    except Exception as e:
-        logger.error(f"Error in websocket loop: {e}")
-        await websocket.close()
 
 if __name__ == "__main__":
     # Run the server on all interfaces so mobile devices can connect
