@@ -4,8 +4,8 @@
 #
 # All tunable parameters used by the drowsiness detection logic.
 #
-# All timing values assume the camera runs at ~30 FPS.
-# Adjust the frame-based constants if your FPS is different.
+# IMPORTANT: The Flutter camera service captures frames at ~5 FPS
+# (200ms interval). All frame-based constants are tuned for 5 FPS.
 #
 # ==============================================================
 
@@ -25,7 +25,7 @@ EAR_THRESHOLD: float = 0.21
 # detection noise or slight head movements.
 #   Higher = smoother but slower to react
 #   Lower  = faster reaction but more noise
-EAR_SMOOTHING_WINDOW: int = 5
+EAR_SMOOTHING_WINDOW: int = 3
 
 
 # ─────────────────────────────────────────────────────────────
@@ -34,21 +34,21 @@ EAR_SMOOTHING_WINDOW: int = 5
 
 # Maximum number of consecutive closed-eye frames that still
 # counts as a "normal blink" (ignored for drowsiness).
-# A normal blink lasts ~100–400ms → ~3–12 frames at 30 FPS.
-# We use 8 frames as the cutoff.
-BLINK_MAX_FRAMES: int = 8
+# A normal blink lasts ~100–400ms → ~1–2 frames at 5 FPS.
+# We use 2 frames as the cutoff.
+BLINK_MAX_FRAMES: int = 2
 
 # Minimum number of consecutive closed-eye frames required
 # before the system classifies it as a "drowsy event".
-# 15 frames ≈ 0.5 seconds at 30 FPS — a realistic threshold
+# 4 frames ≈ 0.8 seconds at 5 FPS — a realistic threshold
 # for genuine drowsiness vs intentional eye closure.
-DROWSY_MIN_CLOSED_FRAMES: int = 15
+DROWSY_MIN_CLOSED_FRAMES: int = 4
 
 # After eyes re-open, the system waits this many consecutive
 # open frames before resetting the closure counter.
 # This prevents rapid open/close flickering from resetting
 # a genuine drowsy detection prematurely.
-REOPEN_DEBOUNCE_FRAMES: int = 3
+REOPEN_DEBOUNCE_FRAMES: int = 2
 
 
 # ─────────────────────────────────────────────────────────────
@@ -57,10 +57,10 @@ REOPEN_DEBOUNCE_FRAMES: int = 3
 
 # Size of the sliding window (in frames) used to calculate
 # the drowsiness percentage over recent history.
-# 60 frames ≈ 2 seconds of history at 30 FPS.
+# 15 frames ≈ 3 seconds of history at 5 FPS.
 # Only frames classified as "confirmed drowsy" count toward
 # the percentage — blink frames are excluded.
-SLIDING_WINDOW_SIZE: int = 60
+SLIDING_WINDOW_SIZE: int = 15
 
 
 # ─────────────────────────────────────────────────────────────

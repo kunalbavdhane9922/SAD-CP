@@ -23,6 +23,7 @@ import '../services/camera_service.dart';
 import '../services/websocket_service.dart';
 import '../services/alert_service.dart';
 import '../services/app_settings.dart';
+import '../services/api_service.dart';
 import '../models/detection_result_model.dart';
 
 class DetectionScreen extends StatefulWidget {
@@ -39,6 +40,13 @@ class _DetectionScreenState extends State<DetectionScreen>
   final WebSocketService _wsService = WebSocketService();
   final AlertService _alertService = AlertService();
   final AppSettings _settings = AppSettings();
+  final ApiService _api = ApiService();
+
+  // ── Session Tracking ──
+  DateTime? _sessionStartTime;
+  double _maxDrowsinessPercentage = 0.0;
+  int _drowsyEventCount = 0;
+  bool _wasDrowsy = false;
 
   // ── Animation Controllers ──
   late AnimationController _alertController;
@@ -51,11 +59,9 @@ class _DetectionScreenState extends State<DetectionScreen>
   bool _isCameraReady = false;
   String _errorMessage = '';
 
-  // ── Backend Server URL ──
-  final TextEditingController _serverIpController = TextEditingController(
-    text: '192.168.1.5',
-  );
-  final int _serverPort = 8000;
+  // ---- Backend Server URL ──
+  late final TextEditingController _serverIpController;
+  late final int _serverPort;
 
   @override
   void initState() {
@@ -72,6 +78,9 @@ class _DetectionScreenState extends State<DetectionScreen>
       CurvedAnimation(parent: _alertController, curve: Curves.easeInOut),
     );
 
+    _serverIpController = TextEditingController(text: _settings.serverIp);
+    _serverPort = _settings.serverPort;
+
     _initializeCamera();
   }
 
@@ -81,7 +90,12 @@ class _DetectionScreenState extends State<DetectionScreen>
     _stopMonitoring();
     _alertController.dispose();
     _cameraService.dispose();
+    
+    // CRITICAL: Clear the global singleton callback to prevent
+    // calling setState on a defunct element when status changes.
+    _wsService.clearStatusCallback();
     _wsService.disconnect();
+    
     _serverIpController.dispose();
     super.dispose();
   }
@@ -123,11 +137,18 @@ class _DetectionScreenState extends State<DetectionScreen>
     setState(() {
       _isMonitoring = true;
       _errorMessage = '';
+      _sessionStartTime = DateTime.now();
+      _maxDrowsinessPercentage = 0.0;
+      _drowsyEventCount = 0;
+      _wasDrowsy = false;
     });
 
     // Sync settings to alert service
     _alertService.soundEnabled = _settings.soundAlerts;
     _alertService.vibrationEnabled = _settings.vibrationAlerts;
+
+    // Update settings if user changed IP in the text field
+    _settings.serverIp = _serverIpController.text.trim();
 
     // Connect to the backend WebSocket
     _wsService.connect(
@@ -138,6 +159,14 @@ class _DetectionScreenState extends State<DetectionScreen>
           setState(() {
             _result = result;
             _handleAlertLogic(result);
+            // Track session stats
+            if (result.drowsinessPercentage > _maxDrowsinessPercentage) {
+              _maxDrowsinessPercentage = result.drowsinessPercentage;
+            }
+            if (result.isDrowsy && !_wasDrowsy) {
+              _drowsyEventCount++;
+            }
+            _wasDrowsy = result.isDrowsy;
           });
         }
       },
@@ -166,11 +195,30 @@ class _DetectionScreenState extends State<DetectionScreen>
     }
   }
 
-  /// Stop monitoring: stop frame stream + disconnect WebSocket
+  /// Stop monitoring: stop frame stream + disconnect WebSocket + save session
   void _stopMonitoring() {
     _cameraService.stopFrameStream();
     _wsService.disconnect();
     _alertService.stopAlert();
+
+    // Save session to MongoDB if we have a user and valid session
+    if (_sessionStartTime != null && _settings.currentUser != null) {
+      final endTime = DateTime.now();
+      final duration = endTime.difference(_sessionStartTime!).inSeconds;
+      if (duration > 2) {
+        _api.saveSession(
+          userId: _settings.currentUser!.id,
+          startTime: _sessionStartTime!.toIso8601String(),
+          endTime: endTime.toIso8601String(),
+          durationSeconds: duration,
+          maxDrowsinessPercentage: _maxDrowsinessPercentage,
+          totalBlinks: _result.blinkCount,
+          drowsyEvents: _drowsyEventCount,
+          status: 'completed',
+        );
+      }
+    }
+
     if (mounted) {
       setState(() => _isMonitoring = false);
     }
@@ -242,6 +290,10 @@ class _DetectionScreenState extends State<DetectionScreen>
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     children: [
+                      // Control buttons (Moved to top)
+                      _buildControlButtons(),
+                      const SizedBox(height: 20),
+
                       // Connection status bar
                       _buildConnectionBar(),
                       const SizedBox(height: 16),
@@ -256,10 +308,6 @@ class _DetectionScreenState extends State<DetectionScreen>
 
                       // Metrics grid (EAR, %, Blinks, Frames)
                       _buildMetricsGrid(),
-                      const SizedBox(height: 20),
-
-                      // Control buttons
-                      _buildControlButtons(),
                       const SizedBox(height: 12),
 
                       // Error message display

@@ -47,6 +47,9 @@ dependencies:
   # Vibration for physical alerts
   vibration: ^2.0.1
 
+  # HTTP client for REST API communication with backend
+  http: ^1.2.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
